@@ -1,0 +1,47 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Dézipper le projet si présent
+        run: |
+          if [ -f "AdrielVoiceCall.zip" ]; then
+            unzip -o AdrielVoiceCall.zip -d temp_extract
+            cp -r temp_extract/AdrielVoiceCall/* .
+            rm -rf temp_extract
+          fi
+
+      - name: Configurer Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Rendre gradlew exécutable
+        run: chmod +x ./gradlew || true
+
+      - name: Générer le wrapper Gradle si absent
+        run: |
+          if [ ! -f "./gradlew" ]; then
+            gradle wrapper --gradle-version 8.4
+            chmod +x ./gradlew
+          fi
+
+      - name: Compiler l'APK (debug)
+        run: ./gradlew assembleDebug
+
+      - name: Uploader l'APK généré
+        uses: actions/upload-artifact@v4
+        with:
+          name: AdrielVoiceCall-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
