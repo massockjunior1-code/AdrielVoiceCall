@@ -27,7 +27,12 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Compiler l'APK (debug) avec Gradle système
+      - name: Installer Gradle 8.4 (compatible AGP)
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.4'
+
+      - name: Compiler l'APK (debug) avec Gradle 8.4
         run: gradle assembleDebug --no-daemon
 
       - name: Uploader l'APK généré
